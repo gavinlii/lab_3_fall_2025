@@ -171,7 +171,17 @@ class InverseKinematics(Node):
         ################################################################################################
         # TODO: Implement the interpolation function
         ################################################################################################
-        return
+        v1, v2, v3 = self.ee_triangle_positions
+        
+        t_mod = t % 3.0 # loop every 3 sec
+        times = np.array([0.0, 1.0, 2.0])
+
+        x = np.interp(t_mod, times, v1)
+        y = np.interp(t_mod, times, v2)
+        z = np.interp(t_mod, times, v3)
+
+        return np.array(x, y, z)
+
 
     def ik_timer_callback(self):
         if self.joint_positions is not None:
