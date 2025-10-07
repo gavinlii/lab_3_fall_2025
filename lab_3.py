@@ -140,7 +140,7 @@ class InverseKinematics(Node):
             ################################################################################################
             # TODO: Implement the gradient computation
             ################################################################################################
-            grad = (cost_function(theta + np.array(epsilon, 0, 0)) - cost_function(theta - np.array(epsilon, 0, 0))) / (2*epsilon)
+            grad = (cost_function(theta + np.array([epsilon, 0, 0])) - cost_function(theta - np.array([epsilon, 0, 0]))) / (2*epsilon)
             return grad
 
         theta = np.array(initial_guess)
@@ -180,7 +180,7 @@ class InverseKinematics(Node):
         y = np.interp(t_mod, times, v2)
         z = np.interp(t_mod, times, v3)
 
-        return np.array(x, y, z)
+        return np.array([x, y, z])
 
 
     def ik_timer_callback(self):
