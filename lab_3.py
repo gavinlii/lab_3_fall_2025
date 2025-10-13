@@ -151,7 +151,6 @@ class InverseKinematics(Node):
                 cost_minus = cost_function(theta_minus)
 
                 grad[i] = (cost_plus - cost_minus) / (2 * epsilon)
-            #grad = (cost_function(theta + np.array([epsilon, 0, 0])) - cost_function(theta - np.array([epsilon, 0, 0]))) / (2*epsilon)
             return grad
 
         theta = np.array(initial_guess)
@@ -167,8 +166,9 @@ class InverseKinematics(Node):
             ################################################################################################
             # TODO: Implement the gradient update. Use the cost function you implemented, and use tolerance t
             # to determine if IK has converged
-            while cost_function(theta) > tolerance:
-                theta = theta - learning_rate * grad
+            if np.sum(np.abs(target_ee-theta)) < tolerance:
+                break
+            theta = theta - learning_rate * grad
             # TODO (BONUS): Implement the (quasi-)Newton's method instead of finite differences for faster convergence
             ################################################################################################
 
