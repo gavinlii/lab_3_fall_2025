@@ -140,7 +140,18 @@ class InverseKinematics(Node):
             ################################################################################################
             # TODO: Implement the gradient computation
             ################################################################################################
-            grad = (cost_function(theta + np.array([epsilon, 0, 0])) - cost_function(theta - np.array([epsilon, 0, 0]))) / (2*epsilon)
+            grad = np.zeros_like(theta)
+            for i in range(len(theta)):
+                theta_plus = theta.copy()
+                theta_minus = theta.copy()
+                theta_plus[i] += epsilon
+                theta_minus[i] -= epsilon
+
+                cost_plus = cost_function(theta_plus)
+                cost_minus = cost_function(theta_minus)
+
+                grad[i] = (cost_plus - cost_minus) / (2 * epsilon)
+            #grad = (cost_function(theta + np.array([epsilon, 0, 0])) - cost_function(theta - np.array([epsilon, 0, 0]))) / (2*epsilon)
             return grad
 
         theta = np.array(initial_guess)
