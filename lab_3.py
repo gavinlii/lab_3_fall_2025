@@ -26,7 +26,7 @@ class InverseKinematics(Node):
         )
 
         self.pd_timer_period = 1.0 / 200  # 200 Hz
-        self.ik_timer_period = 1.0 / 20   # 10 Hz
+        self.ik_timer_period = 1.0 / 50   # 50 Hz
         self.pd_timer = self.create_timer(self.pd_timer_period, self.pd_timer_callback)
         self.ik_timer = self.create_timer(self.ik_timer_period, self.ik_timer_callback)
 
@@ -124,7 +124,7 @@ class InverseKinematics(Node):
 
         return end_effector_position
 
-    def inverse_kinematics(self, target_ee, initial_guess=[0, 0, 0]):
+    def inverse_kinematics(self, target_ee, initial_guess=[0,0,0]):
         def cost_function(theta):
             # Compute the cost function and the L2 norm of the error
             # return the cost and the L2 norm of the error
@@ -154,9 +154,9 @@ class InverseKinematics(Node):
             return grad
 
         theta = np.array(initial_guess)
-        learning_rate = 5 # TODO: Set the learning rate
-        max_iterations = 10 # TODO: Set the maximum number of iterations
-        tolerance = 0.02 # TODO: Set the tolerance for the L1 norm of the error
+        learning_rate = 10 # TODO: Set the learning rate
+        max_iterations = 20 # TODO: Set the maximum number of iterations
+        tolerance = 0.0002 # TODO: Set the tolerance for the L1 norm of the error
 
         cost_l = []
         for _ in range(max_iterations):
@@ -184,13 +184,21 @@ class InverseKinematics(Node):
         ################################################################################################
         v1, v2, v3 = self.ee_triangle_positions
         
-        t_mod = t % 3.0 # loop every 3 sec
-        times = np.array([0.0, 1.0, 2.0])
-
-        x = np.interp(t_mod, times, v1)
-        y = np.interp(t_mod, times, v2)
-        z = np.interp(t_mod, times, v3)
-
+        t_mod = t % 3 # loop every 3 sec
+        
+        if (t_mod < 1):
+            x = (v2[0]-v1[0]) * t_mod + v1[0]
+            z = (v2[2]-v1[2]) * t_mod + v1[2]
+            y = (v2[1]-v1[1]) * t_mod + v1[1]
+        elif (t_mod < 2):
+            x = (v3[0]-v2[0]) * (t_mod - 1) + v2[0]
+            z = (v3[2]-v2[2]) * (t_mod - 1) + v2[2]
+            y = (v3[1]-v2[1]) * (t_mod - 1) + v2[1]
+        else:
+            x = (v1[0]-v3[0]) * (t_mod - 2) + v3[0]
+            z = (v1[2]-v3[2]) * (t_mod - 2) + v3[2]
+            y = (v1[1]-v3[1]) * (t_mod - 2) + v3[1]
+    
         return np.array([x, y, z])
 
 
@@ -204,7 +212,7 @@ class InverseKinematics(Node):
             ################################################################################################
             # TODO: Implement the time update
             ################################################################################################
-            
+            self.t += self.ik_timer_period
             self.get_logger().info(f'Target EE: {target_ee}, Current EE: {current_ee}, Target Angles: {self.target_joint_positions}, Target Angles to EE: {self.forward_kinematics(*self.target_joint_positions)}, Current Angles: {self.joint_positions}')
 
     def pd_timer_callback(self):
