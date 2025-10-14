@@ -5,7 +5,7 @@ from std_msgs.msg import Float64MultiArray
 import numpy as np
 np.set_printoptions(precision=3, suppress=True)
 
-Kp = 3
+Kp = 0.01
 Kd = 0.1
 
 class InverseKinematics(Node):
