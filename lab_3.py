@@ -51,10 +51,6 @@ class InverseKinematics(Node):
         self.joint_velocities = np.array([msg.velocity[msg.name.index(joint)] for joint in joints_of_interest])
 
     def forward_kinematics(self, theta1, theta2, theta3):
-        ################################################################################################
-        # TODO: Compute the forward kinematics for the front right leg (should be easy after lab 2!)
-        ################################################################################################
-        
         def rotation_x(angle):
             # rotation about the x-axis implemented for you
             return np.array(
@@ -126,20 +122,10 @@ class InverseKinematics(Node):
 
     def inverse_kinematics(self, target_ee, initial_guess=[0,0,0]):
         def cost_function(theta):
-            # Compute the cost function and the L2 norm of the error
-            # return the cost and the L2 norm of the error
-            ################################################################################################
-            # TODO: Implement the cost function
-            # HINT: You can use the * notation on a list to "unpack" a list
-            ################################################################################################
-            cost = np.linalg.norm(target_ee-self.forward_kinematics(*theta))
-            return cost **2
+           cost = np.linalg.norm(target_ee-self.forward_kinematics(*theta))
+           return cost **2
         
         def gradient(theta, epsilon=1e-3):
-            # Compute the gradient of the cost function using finite differences
-            ################################################################################################
-            # TODO: Implement the gradient computation
-            ################################################################################################
             grad = np.zeros_like(theta)
             for i in range(len(theta)):
                 theta_plus = theta.copy()
@@ -162,10 +148,6 @@ class InverseKinematics(Node):
         for _ in range(max_iterations):
             grad = gradient(theta)
 
-            # Update the theta (parameters) using the gradient and the learning rate
-            ################################################################################################
-            # TODO: Implement the gradient update. Use the cost function you implemented, and use tolerance t
-            # to determine if IK has converged
             if np.sum(np.abs(target_ee-theta)) < tolerance:
                 break
             theta = theta - learning_rate * grad
@@ -177,27 +159,22 @@ class InverseKinematics(Node):
         return theta
 
     def interpolate_triangle(self, t):
-        # Intepolate between the three triangle positions in the self.ee_triangle_positions
-        # based on the current time t
-        ################################################################################################
-        # TODO: Implement the interpolation function
-        ################################################################################################
         v1, v2, v3 = self.ee_triangle_positions
         
         t_mod = t % 3 # loop every 3 sec
         
         if (t_mod < 1):
             x = (v2[0]-v1[0]) * t_mod + v1[0]
-            z = (v2[2]-v1[2]) * t_mod + v1[2]
             y = (v2[1]-v1[1]) * t_mod + v1[1]
+            z = (v2[2]-v1[2]) * t_mod + v1[2]
         elif (t_mod < 2):
             x = (v3[0]-v2[0]) * (t_mod - 1) + v2[0]
-            z = (v3[2]-v2[2]) * (t_mod - 1) + v2[2]
             y = (v3[1]-v2[1]) * (t_mod - 1) + v2[1]
+            z = (v3[2]-v2[2]) * (t_mod - 1) + v2[2]
         else:
             x = (v1[0]-v3[0]) * (t_mod - 2) + v3[0]
-            z = (v1[2]-v3[2]) * (t_mod - 2) + v3[2]
             y = (v1[1]-v3[1]) * (t_mod - 2) + v3[1]
+            z = (v1[2]-v3[2]) * (t_mod - 2) + v3[2]
     
         return np.array([x, y, z])
 
